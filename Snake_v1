@@ -7,13 +7,18 @@
 
 using namespace std;
 
-const int HEIGHT_GAME_MAP = 20;
-const int WIDTH_GAME_MAP = 40;
+const int HEIGHT_GAME_MAP = 10;
+const int WIDTH_GAME_MAP = 20;
 const char EMPTY = ' ';
 const char WALL = '#';
 const char SNAKE_HEAD = '@';
 const char SNAKE_BODY = 'o';
 const char FOOD = '*';
+const int TIMERENDER = 200;
+const char MOVEUP = 'w';
+const char MOVEDOWN = 's';
+const char MOVELEFT = 'a';
+const char MOVERIGHT = 'd';
 
 struct Position
 {
@@ -138,19 +143,19 @@ Direction HandleInput(Direction currentDirection) {
         int key = _getch();
 
         switch (key) {
-        case 'w': case 'W':
+        case MOVEUP:
             if (currentDirection != DOWN)
                 newDirection = UP;
             break;
-        case 's': case 'S':
+        case MOVEDOWN:
             if (currentDirection != UP)
                 newDirection = DOWN;
             break;
-        case 'a': case 'A':
+        case MOVELEFT:
             if (currentDirection != RIGHT)
                 newDirection = LEFT;
             break;
-        case 'd': case 'D':
+        case MOVERIGHT:
             if (currentDirection != LEFT)
                 newDirection = RIGHT;
             break;
@@ -363,7 +368,7 @@ void GameLoop()
             break;
         }
 
-        Sleep(200);
+        Sleep(TIMERENDER);
     }
 }
 
