@@ -7,18 +7,16 @@
 
 using namespace std;
 
-const int HEIGHT_GAME_MAP = 10;
-const int WIDTH_GAME_MAP = 20;
+const int HEIGHT_GAME_MAP = 20;
+const int WIDTH_GAME_MAP = 40;
 const char EMPTY = ' ';
 const char WALL = '#';
 const char SNAKE_HEAD = '@';
 const char SNAKE_BODY = 'o';
 const char FOOD = '*';
-const int TIMERENDER = 200;
-const char MOVEUP = 'w';
-const char MOVEDOWN = 's';
-const char MOVELEFT = 'a';
-const char MOVERIGHT = 'd';
+const string WIN_MESSAGE = "Поздравляем! Вы заполнили всю карту! Победа!";
+const string CRASH_BY_SNAKE = "Столкновение с телом змейки! Игра окончена.";
+const string CRASH_BY_WALL = "Столкновение со стеной! Игра окончена.";
 
 struct Position
 {
@@ -54,32 +52,40 @@ int RandomInt(int min, int max)
 }
 
 // Функция создания и заполнения игрового поля
-void CreateGameMap(vector<vector<char>>& map) {
+void CreateGameMap(vector<vector<char>>& map) 
+{
     map = vector<vector<char>>(HEIGHT_GAME_MAP, vector<char>(WIDTH_GAME_MAP, EMPTY));
 
-    for (int j = 0; j < WIDTH_GAME_MAP; ++j) {
+    for (int j = 0; j < WIDTH_GAME_MAP; ++j) 
+    {
         map[0][j] = WALL;
         map[HEIGHT_GAME_MAP - 1][j] = WALL;
     }
 
-    for (int i = 1; i < HEIGHT_GAME_MAP - 1; ++i) {
+    for (int i = 1; i < HEIGHT_GAME_MAP - 1; ++i) 
+    {
         map[i][0] = WALL;
         map[i][WIDTH_GAME_MAP - 1] = WALL;
     }
 }
 
 // Функция для отрисовки змейки на карте
-void DrawSnakeOnMap(vector<vector<char>>& map, const vector<Position>& snake) {
-    for (int i = 0; i < snake.size(); i++) {
+void DrawSnakeOnMap(vector<vector<char>>& map, const vector<Position>& snake) 
+{
+    for (int i = 0; i < snake.size(); i++) 
+    {
         Position segment = snake[i];
 
         if (segment.y >= 0 && segment.y < HEIGHT_GAME_MAP &&
-            segment.x >= 0 && segment.x < WIDTH_GAME_MAP) {
+            segment.x >= 0 && segment.x < WIDTH_GAME_MAP) 
+        {
 
-            if (i == 0) {
+            if (i == 0) 
+            {
                 map[segment.y][segment.x] = SNAKE_HEAD;
             }
-            else {
+            else 
+            {
                 map[segment.y][segment.x] = SNAKE_BODY;
             }
         }
@@ -87,12 +93,15 @@ void DrawSnakeOnMap(vector<vector<char>>& map, const vector<Position>& snake) {
 }
 
 // Функция печати игрового поля с буферизацией
-void PrintGameMap(const vector<vector<char>>& map) {
+void PrintGameMap(const vector<vector<char>>& map) 
+{
     string buffer;
     buffer.reserve(HEIGHT_GAME_MAP * (WIDTH_GAME_MAP + 1));
 
-    for (const auto& row : map) {
-        for (char cell : row) {
+    for (const auto& row : map) 
+    {
+        for (char cell : row) 
+        {
             buffer += cell;
         }
         buffer += '\n';
@@ -107,7 +116,8 @@ void PrintGameMap(const vector<vector<char>>& map) {
 }
 
 //функция создания змейки
-vector<Position> CreateSnake() {
+vector<Position> CreateSnake() 
+{
     vector<Position> Snake;
     int center_y = HEIGHT_GAME_MAP / 2;
     int center_x = WIDTH_GAME_MAP / 2;
@@ -120,10 +130,12 @@ vector<Position> CreateSnake() {
 }
 
 // Функция движения змейки
-void MoveSnake(vector<Position>& snake, Direction direction, bool grow) {
+void MoveSnake(vector<Position>& snake, Direction direction, bool grow) 
+{
     Position newHead = snake[0];
 
-    switch (direction) {
+    switch (direction) 
+    {
     case UP:    newHead.y--; break;
     case DOWN:  newHead.y++; break;
     case LEFT:  newHead.x--; break;
@@ -136,26 +148,29 @@ void MoveSnake(vector<Position>& snake, Direction direction, bool grow) {
 }
 
 // Функция обработки ввода
-Direction HandleInput(Direction currentDirection) {
+Direction HandleInput(Direction currentDirection) 
+{
     Direction newDirection = currentDirection;
 
-    if (_kbhit()) {
+    if (_kbhit()) 
+    {
         int key = _getch();
 
-        switch (key) {
-        case MOVEUP:
+        switch (key) 
+        {
+        case 'w': case 'W':
             if (currentDirection != DOWN)
                 newDirection = UP;
             break;
-        case MOVEDOWN:
+        case 's': case 'S':
             if (currentDirection != UP)
                 newDirection = DOWN;
             break;
-        case MOVELEFT:
+        case 'a': case 'A':
             if (currentDirection != RIGHT)
                 newDirection = LEFT;
             break;
-        case MOVERIGHT:
+        case 'd': case 'D':
             if (currentDirection != LEFT)
                 newDirection = RIGHT;
             break;
@@ -165,8 +180,9 @@ Direction HandleInput(Direction currentDirection) {
     return newDirection;
 }
 
-// Функция очистки экрана без мигания
-void ClearScreen() {
+// Функция очистки экрана
+void ClearScreen() 
+{
     HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD coord = { 0, 0 };
     DWORD count;
@@ -273,7 +289,7 @@ bool HandleCollisions(vector<Position>& snake, HANDLE hConsole)
         cursorInfo.bVisible = true;
         SetConsoleCursorInfo(hConsole, &cursorInfo);
 
-        cout << endl << "Столкновение с телом змейки! Игра окончена.";
+        cout << endl << CRASH_BY_SNAKE;
         return true;
     }
 
@@ -287,7 +303,7 @@ bool HandleCollisions(vector<Position>& snake, HANDLE hConsole)
         COORD messagePos = { 0, HEIGHT_GAME_MAP + 1 };
         SetConsoleCursorPosition(hConsole, messagePos);
 
-        cout << "Столкновение со стеной! Игра окончена." << endl;
+        cout << CRASH_BY_WALL << endl;
         return true;
     }
 
@@ -299,10 +315,12 @@ void HandleFood(GameData& state)
 {
     if (state.food.x == state.snake[0].x && state.food.y == state.snake[0].y)
     {
-        if (WinThisGame(state.snake)) {
+        if (WinThisGame(state.snake)) 
+        {
             state.grow = true;
         }
-        else {
+        else 
+        {
             state.food = GenerateFood(state.snake);
             state.grow = true;
         }
@@ -326,7 +344,7 @@ bool CheckWinCondition(vector<Position>& snake, HANDLE hConsole)
         COORD messagePos = { 0, HEIGHT_GAME_MAP + 1 };
         SetConsoleCursorPosition(hConsole, messagePos);
 
-        cout << "Поздравляем! Вы заполнили всю карту! Победа!" << endl;
+        cout <<  WIN_MESSAGE << endl;
         return true;
     }
     return false;
@@ -354,25 +372,28 @@ void GameLoop()
     GameData state = InitializeGame();
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    while (state.gameRunning) {
+    while (state.gameRunning) 
+    {
         UpdateGameData(state);
-
-        if (HandleCollisions(state.snake, hConsole)) {
+        if (HandleCollisions(state.snake, hConsole)) 
+        {
             break;
         }
 
         HandleFood(state);
         RenderGame(state);
 
-        if (CheckWinCondition(state.snake, hConsole)) {
+        if (CheckWinCondition(state.snake, hConsole)) 
+        {
             break;
         }
 
-        Sleep(TIMERENDER);
+        Sleep(200);
     }
 }
 
-int main() {
+int main() 
+{
     setlocale(LC_ALL, "Russian");
     GameLoop();
     return 0;
